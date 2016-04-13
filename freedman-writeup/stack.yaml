@@ -1,0 +1,8 @@
+flags: {}
+extra-package-dbs: []
+packages:
+- '.'
+- ../../../haskell/qhull-simple-0.1-patched
+extra-deps:
+- qhull-simple-0.1
+resolver: lts-5.5
