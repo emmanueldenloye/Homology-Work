@@ -51,13 +51,12 @@ validSimplex
   :: SimpMode -> ESMap -> [ESKey] -> [Context () ESKey]
 validSimplex smode m =
   unfoldr (\v ->
-             if null v
-                then Nothing
-                else let (keyVal,keyInd) = head v
-                         rest = tail v
-                     in Just (toContext keyInd $
-                              mapMaybe (pairInComplex smode m keyVal) rest
-                             ,rest)) .
+             case uncons v of
+               Just ((keyVal,keyInd),rest) ->
+                 Just (toContext keyInd $
+                       mapMaybe (pairInComplex smode m keyVal) rest
+                      ,rest)
+               Nothing -> Nothing) .
   (`zip` [0 :: Int ..])
   where toContext a b = (b,a,(),b)
         pairInComplex inSmode esMap keyA val@(keyB,_) =
@@ -80,7 +79,8 @@ validSimplex smode m =
 edgeSet
   :: PType -> [Vector Double] -> Either QError (Maybe ESAssoc)
 edgeSet Boundary _ = Right Nothing
-edgeSet (HasATS basis point) points' = fromC . uncurry qhull  . mapMaybe' $ points'
+edgeSet (HasATS basis point) points' =
+  fromC . uncurry qhull . mapMaybe' $ points'
   where pointInd = fromJust $ elemIndex point points' -- This should be safe!
         alpha y = point - y
         beta y = 0.5 * (y - point)

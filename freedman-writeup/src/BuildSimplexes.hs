@@ -12,9 +12,13 @@ import           Data.Graph.Inductive
 import qualified Data.Graph.Inductive.PatriciaTree as GP
 import           Data.List
 import qualified Data.Map                          as M
-import           Debug.Trace
+import           Data.Monoid
+import           Data.Ord
+import qualified Data.Vector                       as V (fromList, modify,
+                                                         toList)
+import qualified Data.Vector.Algorithms.Intro      as I (sortBy)
 import           LocalRegionEdgeSet
-import           Numeric.LinearAlgebra
+import           Numeric.LinearAlgebra             hiding ((<>))
 import           TangentSpaces
 
 getOneSimplicies
@@ -43,9 +47,17 @@ getOneSimpliciesMatrices n kdims input mode = simplex
         edges' = buildEdgeSets nbdSize simplexSize data'
         simplex = simplComp mode edges'
 
-getAllSimplicies :: GP.Gr () ESKey -> [[Node]]
-getAllSimplicies =
-  concat . simplexHelper 1 . groupBy (on (==) length) . sortOn length . scc
+getAllSimplicies :: Int -> GP.Gr () ESKey -> [[Node]]
+getAllSimplicies k =
+  ([] :) .
+  takeWhile ((<= k) . length) .
+  concat . simplexHelper 1 . groupBy (on (==) length) . vsort . scc
+  where vsort =
+          V.toList .
+          V.modify (I.sortBy (liftM2 (<>) (comparing length) compare)) .
+          V.fromList
+-- This sorting technique is used in case of emergencies. This is an
+-- emergency situation I suppose.
 
 simplexHelper :: Int -> [[[a]]] -> [[[a]]]
 simplexHelper _ [] = []

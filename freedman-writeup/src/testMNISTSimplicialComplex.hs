@@ -38,8 +38,7 @@ main =
            Left ["You did not pick a digit represented " ++
                  "in the MNIST dataset. Choose an integer " ++
                  "i, such that 0 <= i <= 9. "]
-     print $ fmap (incidenceMatrix 4 . getAllSimplicies) result
-     -- print $ fmap (incidenceMatrix 3 . group) result
+     print $ fmap (incidenceMatrix 4 . getAllSimplicies) result-- print $ fmap (incidenceMatrix 3 . group) result
 
 -- reshape' = join (***) (reshape 28)
 -- simplex = fmap (map reshape') result
