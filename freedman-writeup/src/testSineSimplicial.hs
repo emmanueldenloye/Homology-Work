@@ -25,7 +25,7 @@ main =
      let result = getOneSimplicies nbdFactor kdims dataset AndMode
      -- print $ (nub . map length . scc) <$> result
      print $
-       fmap (getAllSimplicies kdims) result
+       fmap (take 50 . incidenceMatrixFast 2 . getAllSimplicies kdims) result
 
 -- foldl' (\(Pair acc1 acc2) ((x1,x2),_) ->
 --                        Pair (max acc1 x1)
