@@ -1,5 +1,6 @@
+
 module BuildSimplexes
-       (getOneSimplicies, getOneSimpliciesMatrices, getAllSimplicies,
+       (getOneSimplicies, getOneSimpliciesMatrices, getAllSimplicies, simplexHelper,
         ppSimp, ppToFiles)
        where
 
@@ -47,27 +48,36 @@ getOneSimpliciesMatrices n kdims input mode = simplex
         edges' = buildEdgeSets nbdSize simplexSize data'
         simplex = simplComp mode edges'
 
-getAllSimplicies :: Int -> GP.Gr () ESKey -> [[Node]]
+getAllSimplicies :: Int -> GP.Gr () ESKey -> [[Integer]]
 getAllSimplicies k =
-  ([] :) .
-  takeWhile ((<= k) . length) .
-  concat . simplexHelper 1 . groupBy (on (==) length) . vsort . scc
-  where vsort =
+  ([] :) . concatMap (simplexHelper k) . vsort . setToIntegers . scc
+  where setToIntegers = map . map $ toInteger
+        vsort =
           V.toList .
           V.modify (I.sortBy (liftM2 (<>) (comparing length) compare)) .
           V.fromList
 -- This sorting technique is used in case of emergencies. This is an
 -- emergency situation I suppose.
 
-simplexHelper :: Int -> [[[a]]] -> [[[a]]]
-simplexHelper _ [] = []
-simplexHelper n (x:xs) =
+-- getAllSimplicies :: Int -> GP.Gr () ESKey -> [[Node]]
+-- getAllSimplicies k =
+--   ([] :) .
+--   takeWhile ((<= k) . length) .
+--   concat . simplexHelper k . groupBy (on (==) length) . vsort . scc
+
+simplexHelper :: (Ord a) => Int -> [a] -> [[a]]
+simplexHelper maxComb x =  map sort . filter (not . null) $ concatMap (`choose` x) listOfCombs
+  where listOfCombs = [1 .. maxComb]
+
+simplexHelper' :: Int -> [[[a]]] -> [[[a]]]
+simplexHelper' _ [] = []
+simplexHelper' n (x:xs) =
   let lists = [n .. length $ head x]
   in if null lists
-        then x : simplexHelper (n + 1) xs
+        then x : simplexHelper' (n + 1) xs
         else concat [choose num list' | num <- lists
                                       , list' <- x] :
-             simplexHelper (n + 1) xs
+             simplexHelper' (n + 1) xs
 
 simplComp :: SimpMode
           -> Either QError ESMap

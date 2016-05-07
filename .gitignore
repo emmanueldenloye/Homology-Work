@@ -14,6 +14,9 @@
 /freedman-writeup/src/*.hs~
 /freedman-writeup/src/*.hi
 /freedman-writeup/src/*.hp
+/freedman-writeup/src/*.dyn_hi
+/freedman-writeup/src/*.dyn_o
+/freedman-writeup/dist/
 /freedman-writeup/src/*.ps
 /freedman-writeup/src/*.aux
 /freedman-writeup/src/*.o

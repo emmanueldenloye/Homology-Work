@@ -1,33 +1,25 @@
 import           BuildSimplexes
-import           Data.Graph.Inductive  (scc)
-import           Data.List
 import           Homology
 import           LocalRegionEdgeSet
-import           Numeric.LinearAlgebra
+import           Numeric.LinearAlgebra (loadMatrix)
 import           System.Environment
-
-data Pair =
-  Pair !Int
-       !Int
-  deriving (Show)
-
--- (/ (* 295 294 293) (* 3 2)) 4235315 (This is huge!)
 
 main :: IO ()
 main =
-  do [nbdFactor',kdims'] <- getArgs
+  do [nbdFactor',kdims',groupNum'] <- getArgs
      let file =
            "/home/emmanuel/Dropbox/haskell/homologyWork/" ++
-           "freedman-writeup/data/SphereRandomDIM3numPts300.txt"
+           "freedman-writeup/data/SphereRandomDIM3numPts100.txt"
          kdims = read kdims' :: Int
          nbdFactor = read nbdFactor' :: Double
      dataset <- loadMatrix file
      let result = getOneSimplicies nbdFactor kdims dataset AndMode
-     -- print $ (nub . map length . scc) <$> result
-     print $
-       fmap (take 50 . incidenceMatrixFast 2 . getAllSimplicies kdims) result
+         allSimplicies = getAllSimplicies kdims <$> result
+         columnComputation =
+           fmap (columnElimination .
+                 incidenceMatrixFast (read groupNum' :: Int))
+                allSimplicies
+     print $ rankValue <$> columnComputation
 
--- foldl' (\(Pair acc1 acc2) ((x1,x2),_) ->
---                        Pair (max acc1 x1)
---                             (max acc2 x2))
---                     (Pair 0 0) .
+ -- With arguments 1.4 3 2, I had to stop the simulation at 93741.88
+ -- seconds or 26 hours. Yeesh! Memory usage is not the issue. Map access is!
